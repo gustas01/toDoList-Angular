@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, DoCheck, OnInit } from '@angular/core';
 import { TaskList } from '../../model/task-list';
 
 @Component({
@@ -6,16 +6,15 @@ import { TaskList } from '../../model/task-list';
   templateUrl: './to-do-list.component.html',
   styleUrls: ['./to-do-list.component.scss']
 })
-export class ToDoListComponent implements OnInit {
+export class ToDoListComponent implements DoCheck {
 
-  public taskList: Array<TaskList> = [
-    {task: "Minha nova task", checked: true},
-    {task: "Minha nova task2", checked: false},
-  ]
+  public taskList: Array<TaskList> = JSON.parse(localStorage.getItem('list') || '[]')
 
   constructor() { }
 
-  ngOnInit(): void {
+  //é executado quando acontece alguma ação dentro do componente
+  ngDoCheck(): void {
+    this.setLocalStorage()
   }
 
   public deleteItemTaskList(event: number){
@@ -33,4 +32,20 @@ export class ToDoListComponent implements OnInit {
 
   }
 
+  public validationInput(event: string, index: number){
+    if(!event.length){
+      const confirm = window.confirm("Task está vazia, deseja deletar?")
+
+      if(confirm) this.deleteItemTaskList(index)
+    }
+
+  }
+
+  public setLocalStorage(){
+    if(this.taskList){
+      this.taskList.sort((first, last) => Number(first.checked) - Number(last.checked))
+
+      localStorage.setItem("list", JSON.stringify(this.taskList))
+    }
+  }
 }
